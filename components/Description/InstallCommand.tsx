@@ -16,7 +16,7 @@ const ACTIVE_COLOR: Record<PackageManager, string> = {
   npm: "#CB3837", 
   pnpm: "#F9AD00", 
   yarn: "#38BDF8",
-  bun: "#FFFFFF",
+  bun: "#FF9557",
 };
 
 export default function InstallCommand({ item }: { item: ComponentItem }) {
