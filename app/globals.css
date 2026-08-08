@@ -206,7 +206,6 @@ html {
   color: #fc4c01;
 }
 
-/* plain css, not @utility: the rule above is unlayered and would beat any layered utility */
 .selection-contrast::selection,
 .selection-contrast *::selection {
   color: #000;
