@@ -67,7 +67,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-1 items-center py-16">
-          <h2 className="font-runde text-[clamp(3rem,12.5vw,10.5rem)] font-bold leading-[0.92] tracking-tight">
+          <h2 className="selection-contrast font-runde text-[clamp(3rem,12.5vw,10.5rem)] font-bold leading-[0.92] tracking-tight">
             Tasteful Components
           </h2>
         </div>
