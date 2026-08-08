@@ -206,6 +206,16 @@ html {
   color: #fc4c01;
 }
 
+.selection-contrast::selection,
+.selection-contrast *::selection {
+  color: #000;
+}
+
+.dark .selection-contrast::selection,
+.dark .selection-contrast *::selection {
+  color: #fff;
+}
+
 [vaul-drawer] {
   transition: transform 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
