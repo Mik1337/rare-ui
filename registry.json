@@ -20,7 +20,7 @@
       "name": "folder-component",
       "type": "registry:ui",
       "title": "Folder Component",
-      "description": "An animated folder whose cards fan out on hover and lift open on click, with a 3D-tilted flap. Supports color and size (sm/md/lg) props.",
+      "description": "An animated folder whose cards fan out on hover and lift open on click, with a 3D-tilted flap.",
       "dependencies": ["motion"],
       "registryDependencies": ["utils"],
       "files": [

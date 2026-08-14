@@ -55,7 +55,7 @@ export const components: ComponentItem[] = [
     href: "/components/foldercomponent",
     registry: "folder-component",
     description:
-      "An animated folder whose cards fan out on hover and lift open on click, with a 3D-tilted flap. Supports color and size (sm/md/lg) props.",
+      "An animated folder whose cards fan out on hover and lift open on click, with a 3D-tilted flap.",
     source: `${REGISTRY_HOMEPAGE}/blob/main/components/ui/folder-component.tsx`,
     preview: "/componentdemos/foldercomponent.mp4",
     featured: true,
@@ -66,21 +66,14 @@ export const components: ComponentItem[] = [
       },
     ],
     interaction:
-      "Hover to fan the cards out, then click to lift the folder open.",
+      "Pick a color to re-theme the folder. Hover to fan the cards out, then click to lift the folder open.",
     props: [
       {
         name: "color",
-        type: '"black" | "white" | "blue"',
+        type: "string",
         default: '"black"',
-        options: ["black", "white", "blue"],
-        control: "swatch",
-        optionColors: {
-          black: "#000000",
-          white: "#ffffff",
-          blue: "#50B1FD",
-        },
         description:
-          "Color theme of the folder, flap, and cards. Each theme sets matching fills, strokes, and inner shadows.",
+          "Any CSS color: hex, rgb, hsl, or a name like white. The folder, flap, and cards are derived from it.",
       },
       {
         name: "size",
@@ -94,7 +87,7 @@ export const components: ComponentItem[] = [
     usage: `import { Folder } from "@/components/ui/folder-component",
 
 export function Demo() {
-  return <Folder color="blue" size="md" />
+  return <Folder color="royalblue" size="md" />
 }`,
   },
   {
