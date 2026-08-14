@@ -159,7 +159,7 @@ export function Demo() {
     href: "/components/proximitysidebar",
     registry: "proximity-sidebar",
     description:
-      "An interactive sidebar with proximity hover effects that appears while scrolling and responds to scroll intensity.",
+      "A document minimap that maps page sections to interactive dashes.",
     source: `${REGISTRY_HOMEPAGE}/blob/main/components/ui/proximity-sidebar.tsx`,
     preview: "/componentdemos/proximitysidebar.mp4",
     dependencies: [
@@ -169,7 +169,7 @@ export function Demo() {
       },
     ],
     interaction:
-      "Scroll through content to track the current section, then move the pointer near dashes to expand them and click to smooth-scroll to a section.",
+      "Scroll to fill dashes up to the current section. Move the pointer to expand nearby dashes and solidify the one you are aiming at. Click a dash to smooth-scroll to that section.",
     props: [
       {
         name: "sections",
@@ -192,6 +192,21 @@ export function Demo() {
         default: "0.4",
         description:
           "Viewport anchor ratio used to detect the active section while scrolling (0 = top, 1 = bottom).",
+      },
+      {
+        name: "fillOpacity",
+        type: "number",
+        default: "0.69 light / 0.55 dark",
+        description:
+          "Foreground alpha of the filled trail. Omit to use 0.69 in light mode and 0.55 in dark mode.",
+      },
+      {
+        name: "hoverCue",
+        type: '"none" | "dim" | "solid"',
+        default: '"solid"',
+        options: ["none", "dim", "solid"],
+        description:
+          "How the aimed dash looks under the pointer. solid makes it full foreground in light mode, and in dark mode makes it full color while dimming the rest. dim keeps a softer contrast, none leaves color to the fill.",
       },
       {
         name: "className",

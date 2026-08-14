@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Pipette } from "lucide-react";
 import FolderComponent from "@/components/ui/folder-component";
 import { usePreviewControl } from "@/components/preview/PreviewControls";
 import PreviewDock from "@/components/preview/PreviewDock";
@@ -41,6 +41,13 @@ function resolveHex(color: string) {
     .slice(0, 3)
     .map((n) => Number(n).toString(16).padStart(2, "0"))
     .join("")}`;
+}
+
+function isLight(hex: string) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return r * 299 + g * 587 + b * 114 > 128000;
 }
 
 const swatchClass = (selected: boolean) =>
@@ -105,6 +112,13 @@ export default function FolderComponentPage() {
           <span
             className="block h-full w-full rounded-[10px]"
             style={{ backgroundColor: color }}
+          />
+          <Pipette
+            aria-hidden
+            className={`pointer-events-none absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 ${
+              isLight(pickerHex) ? "text-black/80" : "text-white"
+            }`}
+            strokeWidth={2.25}
           />
           <input
             type="color"

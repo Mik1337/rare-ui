@@ -62,7 +62,7 @@
       "name": "proximity-sidebar",
       "type": "registry:ui",
       "title": "Proximity Sidebar",
-      "description": "A dash-style scroll sidebar whose items expand as the pointer approaches.",
+      "description": "A document minimap that maps page sections to interactive dashes.",
       "dependencies": ["motion"],
       "registryDependencies": ["utils"],
       "files": [
