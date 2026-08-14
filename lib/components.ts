@@ -692,7 +692,7 @@ export function Demo() {
     href: "/components/otpinput",
     registry: "otp-input",
     description:
-      "A one-time-code input whose characters roll into place behind a caret that slides from slot to slot.",
+      "A one-time-code input whose digits spin into place like a dial, behind a caret that slides from slot to slot.",
     source: `${REGISTRY_HOMEPAGE}/blob/main/components/ui/otp-input.tsx`,
     preview: "/componentdemos/otpinput.mp4",
     featured: true,
@@ -703,7 +703,7 @@ export function Demo() {
       },
     ],
     interaction:
-      "Type to fill each slot and move to the next one. Backspace clears a slot in place, then steps back on the next press. Arrow keys move between slots, and a caret slides along with you. Pasting a code, or letting the phone autofill one from a text message, drops it straight in. Set the status to turn the slots green, or shake them red on a wrong code.",
+      "Type to fill each slot and move to the next one. Each digit rolls through the full slot. Neighboring numbers blur and fade at the top and bottom before the target settles in the center. Backspace clears a slot in place, then steps back on the next press. Arrow keys move between slots, and a caret slides along with you. Pasting a code, or letting the phone autofill one from a text message, drops it straight in. After the last digit settles, the slots turn green, or shake red on a wrong code.",
     props: [
       {
         name: "length",
@@ -719,6 +719,20 @@ export function Demo() {
         options: ["sm", "md", "lg"],
         description:
           "Overall scale of the boxes. Maps to 40px (sm), 48px (md), and 56px (lg), and carries the text, caret, and gaps with it.",
+      },
+      {
+        name: "duration",
+        type: "number",
+        default: "800",
+        description:
+          "How long a 9 takes to roll into place, in milliseconds. Smaller digits settle sooner. Ignored when dial is off.",
+      },
+      {
+        name: "dial",
+        type: "boolean",
+        default: "true",
+        description:
+          "Spins each digit through the numbers below it. Off, the character slides in on its own.",
       },
       {
         name: "value",
@@ -740,7 +754,8 @@ export function Demo() {
       {
         name: "onComplete",
         type: "(value: string) => void",
-        description: "Fires once the last slot is filled.",
+        description:
+          "Fires once the last slot is filled, after its digit has finished rolling.",
       },
       {
         name: "type",

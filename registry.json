@@ -137,7 +137,7 @@
       "name": "otp-input",
       "type": "registry:ui",
       "title": "OTP Input",
-      "description": "A one-time-code input whose characters roll into place behind a caret that slides from slot to slot.",
+      "description": "A one-time-code input whose digits spin into place like a dial, behind a caret that slides from slot to slot.",
       "dependencies": ["motion"],
       "registryDependencies": ["utils"],
       "files": [
