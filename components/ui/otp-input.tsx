@@ -56,7 +56,7 @@ const SIZES = {
 } as const;
 
 const SLOT_CLASS =
-  "bg-[#F4F4F9] dark:bg-[#262626] text-center font-medium text-transparent caret-transparent outline-none transition-shadow duration-200 selection:bg-transparent disabled:cursor-not-allowed disabled:opacity-50";
+  "bg-[#F4F4F9] dark:bg-[#262626] text-center font-medium text-transparent caret-transparent outline-none transition-shadow duration-200 selection:bg-transparent selection:text-transparent disabled:cursor-not-allowed disabled:opacity-50";
 
 const ROLL_SPRING = { type: "spring", stiffness: 500, damping: 34 } as const;
 const ROLL_MS = 280;
@@ -290,7 +290,7 @@ export function OtpInput({
   const focusAt = (index: number) => {
     const input = inputs.current[Math.min(Math.max(index, 0), length - 1)];
     input?.focus();
-    input?.select();
+    if (!input?.value) input?.select();
   };
 
   const fill = (index: number, chars: string[]) => {
@@ -327,7 +327,7 @@ export function OtpInput({
 
     setCharAt(index, typed);
     editingAt.current = null;
-    focusAt(index + 1);
+    if (index + 1 < length) focusAt(index + 1);
   };
 
   const handleKeyDown = (
@@ -440,7 +440,9 @@ export function OtpInput({
                 onKeyDown={(event) => handleKeyDown(index, event)}
                 onPaste={(event) => handlePaste(index, event)}
                 onPointerDown={(event) => handlePointerDown(index, event)}
-                onFocus={(event) => event.target.select()}
+                onFocus={(event) => {
+                  if (!event.target.value) event.target.select();
+                }}
                 type={mask ? "password" : "text"}
                 inputMode={numeric ? "numeric" : "text"}
                 autoCapitalize={numeric ? undefined : "characters"}
