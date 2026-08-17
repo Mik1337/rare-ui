@@ -17,12 +17,24 @@
       ]
     },
     {
+      "name": "color",
+      "type": "registry:lib",
+      "title": "Color helpers",
+      "description": "Parse CSS colors into RGB, then mix or convert them.",
+      "files": [
+        {
+          "path": "lib/color.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "folder-component",
       "type": "registry:ui",
       "title": "Folder Component",
       "description": "An animated folder whose cards fan out on hover and lift open on click, with a 3D-tilted flap.",
       "dependencies": ["motion"],
-      "registryDependencies": ["utils"],
+      "registryDependencies": ["utils", "color"],
       "files": [
         {
           "path": "components/ui/folder-component.tsx",

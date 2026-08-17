@@ -17,6 +17,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
+import { animate } from "motion";
 
 import { cn } from "@/lib/utils";
 
@@ -70,6 +71,7 @@ type ProximitySidebarProps = Omit<ComponentProps<"nav">, "children"> & {
 const RADIUS = 40;
 const MAX_DASH_WIDTH = 110;
 const SCROLL_IDLE_RESET_DELAY = 80;
+const SCROLL_LOCK_IDLE = 120;
 const BOTTOM_SNAP = 8;
 const EMPHASIS_SCALE_Y = 2;
 const FILL_CLASS = "bg-foreground/69 dark:bg-foreground/55";
@@ -80,6 +82,7 @@ const BODY_CLASS = "bg-muted-foreground/30 dark:bg-muted-foreground/40";
 const BODY_HOVER_CLASS = "bg-foreground dark:bg-muted-foreground/40";
 const DASH_HEIGHT_CLASS = "h-[1.5px] dark:h-px";
 const DASH_SPRING = { stiffness: 320, damping: 34, mass: 0.7 };
+const FILL_SPRING = { type: "spring", duration: 0.28, bounce: 0 } as const;
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 
 const DASH_PRESETS: Record<SectionKind, DashPreset> = {
@@ -282,8 +285,13 @@ const ProximitySidebar = ({
   const finePointer = useRef(false);
   const pointerInside = useRef(false);
   const resetTimer = useRef<number | null>(null);
+  const scrollLock = useRef(false);
+  const scrollLockTimer = useRef<number | null>(null);
   const [hoveredId, setHoveredId] = useState<string>();
   const [activeId, setActiveId] = useState(sections[0]?.id);
+  const activeIndex = sections.findIndex((section) => section.id === activeId);
+  const visualIndexRef = useRef(activeIndex);
+  const [visualIndex, setVisualIndex] = useState(activeIndex);
 
   const sectionIds = useMemo(
     () => sections.map((section) => section.id).join("|"),
@@ -329,6 +337,20 @@ const ProximitySidebar = ({
     resetTimer.current = null;
   }, []);
 
+  const clearScrollLock = useCallback(() => {
+    if (!scrollLockTimer.current) return;
+    window.clearTimeout(scrollLockTimer.current);
+    scrollLockTimer.current = null;
+  }, []);
+
+  const releaseScrollLockSoon = useCallback(() => {
+    clearScrollLock();
+    scrollLockTimer.current = window.setTimeout(() => {
+      scrollLock.current = false;
+      scrollLockTimer.current = null;
+    }, SCROLL_LOCK_IDLE);
+  }, [clearScrollLock]);
+
   const pulseDash = useCallback(
     (id?: string) => {
       if (reduceMotion) return;
@@ -360,6 +382,10 @@ const ProximitySidebar = ({
       const element = getSectionElement(id);
       if (!element) return;
 
+      // hold the clicked dash until programmatic scroll goes idle
+      scrollLock.current = true;
+      releaseScrollLockSoon();
+
       element.scrollIntoView({
         behavior: reduceMotion ? "auto" : "smooth",
         block: "start",
@@ -369,10 +395,16 @@ const ProximitySidebar = ({
       setActiveId(id);
       pulseDash(id);
     },
-    [pulseDash, reduceMotion],
+    [pulseDash, reduceMotion, releaseScrollLockSoon],
   );
 
-  useEffect(() => () => clearPendingReset(), [clearPendingReset]);
+  useEffect(
+    () => () => {
+      clearPendingReset();
+      clearScrollLock();
+    },
+    [clearPendingReset, clearScrollLock],
+  );
 
   useEffect(() => {
     const media = window.matchMedia(FINE_POINTER);
@@ -408,6 +440,11 @@ const ProximitySidebar = ({
 
     const updateActiveSection = () => {
       frame = 0;
+
+      if (scrollLock.current) {
+        releaseScrollLockSoon();
+        return;
+      }
 
       const lastSection = sections.findLast((section) =>
         getSectionElement(section.id),
@@ -446,6 +483,19 @@ const ProximitySidebar = ({
       frame = window.requestAnimationFrame(updateActiveSection);
     };
 
+    const interruptLock = (event: Event) => {
+      if (!scrollLock.current) return;
+      if (
+        event.target instanceof Node &&
+        stackRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+
+      scrollLock.current = false;
+      clearScrollLock();
+    };
+
     const scrollParents = new Set<EventTarget>([window]);
 
     for (const section of sections) {
@@ -457,6 +507,8 @@ const ProximitySidebar = ({
 
     for (const parent of scrollParents) {
       parent.addEventListener("scroll", scheduleUpdate, { passive: true });
+      parent.addEventListener("wheel", interruptLock, { passive: true });
+      parent.addEventListener("touchmove", interruptLock, { passive: true });
     }
 
     window.addEventListener("resize", scheduleUpdate);
@@ -465,12 +517,52 @@ const ProximitySidebar = ({
       if (frame) window.cancelAnimationFrame(frame);
       for (const parent of scrollParents) {
         parent.removeEventListener("scroll", scheduleUpdate);
+        parent.removeEventListener("wheel", interruptLock);
+        parent.removeEventListener("touchmove", interruptLock);
       }
       window.removeEventListener("resize", scheduleUpdate);
     };
-  }, [activeOffset, pulseDash, sectionIds, sections]);
+  }, [
+    activeOffset,
+    clearScrollLock,
+    pulseDash,
+    releaseScrollLockSoon,
+    sectionIds,
+    sections,
+  ]);
 
-  const activeIndex = sections.findIndex((section) => section.id === activeId);
+  useEffect(() => {
+    const snap = () => {
+      visualIndexRef.current = activeIndex;
+      setVisualIndex((current) =>
+        current === activeIndex ? current : activeIndex,
+      );
+    };
+
+    // click: ease the fill to the target. scroll: snap tick by tick
+    if (reduceMotion || !scrollLock.current) {
+      snap();
+      return;
+    }
+
+    const from = visualIndexRef.current < 0 ? 0 : visualIndexRef.current;
+    if (from === activeIndex) {
+      snap();
+      return;
+    }
+
+    const controls = animate(from, activeIndex, {
+      ...FILL_SPRING,
+      onUpdate: (value) => {
+        visualIndexRef.current = value;
+        const next = Math.round(value);
+        setVisualIndex((current) => (current === next ? current : next));
+      },
+      onComplete: snap,
+    });
+
+    return () => controls.stop();
+  }, [activeIndex, reduceMotion]);
 
   return (
     <nav
@@ -536,7 +628,7 @@ const ProximitySidebar = ({
               registerDash={registerDash}
               section={section}
               side={side}
-              tone={getDashTone(index, activeIndex)}
+              tone={getDashTone(index, visualIndex)}
             />
           );
         })}

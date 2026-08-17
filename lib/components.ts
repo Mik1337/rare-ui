@@ -169,7 +169,7 @@ export function Demo() {
       },
     ],
     interaction:
-      "Scroll to fill dashes up to the current section. Move the pointer to expand nearby dashes and solidify the one you are aiming at. Click a dash to smooth-scroll to that section.",
+      "Scroll to fill dashes up to the current section. Move the pointer to expand nearby dashes and solidify the one you are aiming at. Click a dash to scroll there; the fill eases to it.",
     props: [
       {
         name: "sections",
