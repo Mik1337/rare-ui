@@ -121,15 +121,12 @@ export function BounceSidebar({
       duration: MOVE_NEAR * 0.4,
     });
     controls.push(squashX, squashY, xOut);
-    squashY.then(() => {
-      if (gen !== hopGen.current) return;
-      controls.push(animate(scaleX, 1, STIFF), animate(scaleY, 1, STIFF));
-    });
     xOut.then(() => {
       if (gen !== hopGen.current) return;
+      land();
       controls.push(animate(x, 0, STIFF));
     });
-  }, [reduceMotion, scaleX, scaleY, x]);
+  }, [land, reduceMotion, scaleX, scaleY, x]);
 
   useIsomorphicLayoutEffect(() => {
     let cancelled = false;
