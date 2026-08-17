@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Squircle } from "@squircle-js/react";
 
-const SQUIRCLE = { cornerRadius: 16, cornerSmoothing: 5 } as const;
+const SQUIRCLE = { cornerRadius: 16, cornerSmoothing: 1 } as const;
 
 type PreviewDockProps = {
   children: React.ReactNode;
