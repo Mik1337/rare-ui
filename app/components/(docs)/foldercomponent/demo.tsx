@@ -1,7 +1,10 @@
 "use client";
 
 import { useRef } from "react";
-import { GripVertical, Pipette } from "lucide-react";
+import {
+  GripVertical,
+  // Pipette
+} from "lucide-react";
 import FolderComponent from "@/components/ui/folder-component";
 import { usePreviewControl } from "@/components/preview/PreviewControls";
 import PreviewDock from "@/components/preview/PreviewDock";
@@ -97,7 +100,7 @@ export default function FolderComponentPage() {
             />
           );
         })}
-        <label
+        {/* <label
           className={`relative h-7 w-7 cursor-pointer rounded-xl p-0.5 shadow-xl transition-transform duration-150 ${
             presetSelected
               ? ""
@@ -127,7 +130,7 @@ export default function FolderComponentPage() {
             aria-label="Pick any color"
             className="absolute inset-0 cursor-pointer opacity-0"
           />
-        </label>
+        </label> */}
       </PreviewDock>
     </div>
   );

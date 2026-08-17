@@ -102,6 +102,35 @@ export function BounceSidebar({
     animate(scaleY, 1, STIFF);
   }, [reduceMotion, scaleX, scaleY]);
 
+  const bounceInPlace = useCallback(() => {
+    if (reduceMotion) return;
+    playback.current?.stop();
+    const gen = ++hopGen.current;
+    const controls: { stop: () => void }[] = [];
+    playback.current = {
+      stop: () => {
+        hopGen.current += 1;
+        for (const control of controls) control.stop();
+      },
+    };
+    const squashX = animate(scaleX, 1.32, PRESS);
+    const squashY = animate(scaleY, 0.58, PRESS);
+    const xOut = animate(x, -NEAR_APEX, {
+      type: "spring",
+      bounce: 0,
+      duration: MOVE_NEAR * 0.4,
+    });
+    controls.push(squashX, squashY, xOut);
+    squashY.then(() => {
+      if (gen !== hopGen.current) return;
+      controls.push(animate(scaleX, 1, STIFF), animate(scaleY, 1, STIFF));
+    });
+    xOut.then(() => {
+      if (gen !== hopGen.current) return;
+      controls.push(animate(x, 0, STIFF));
+    });
+  }, [reduceMotion, scaleX, scaleY, x]);
+
   useIsomorphicLayoutEffect(() => {
     let cancelled = false;
     const snap = () => {
@@ -185,10 +214,7 @@ export function BounceSidebar({
   }, [activeIndex, dotSize, land, reduceMotion, snapTo, x, y]);
 
   const select = (index: number) => {
-    if (index === activeIndex) {
-      land();
-      return;
-    }
+    if (index === activeIndex) return;
     if (value === undefined) setInternalValue(index);
     onChange?.(index);
   };
@@ -237,6 +263,9 @@ export function BounceSidebar({
                 data-slot="bounce-sidebar-item"
                 data-active={isActive}
                 onPointerDown={pressIn}
+                onPointerUp={() => {
+                  if (index === activeIndex) bounceInPlace();
+                }}
                 onClick={() => select(index)}
                 className={itemClassName}
               >
@@ -248,6 +277,9 @@ export function BounceSidebar({
                 data-slot="bounce-sidebar-item"
                 data-active={isActive}
                 onPointerDown={pressIn}
+                onPointerUp={() => {
+                  if (index === activeIndex) bounceInPlace();
+                }}
                 onClick={() => select(index)}
                 className={itemClassName}
               >
