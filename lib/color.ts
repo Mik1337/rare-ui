@@ -45,8 +45,11 @@ const NAMED: Record<string, RGB> = Object.fromEntries(
 /** Read one rgb/hsl channel. Percent values are scaled; bare numbers stay as-is. */
 function channel(v: string, scale = 255) {
   const t = v.trim();
-  if (t.endsWith("%")) return Math.round((parseFloat(t) / 100) * scale);
-  return Math.round(parseFloat(t));
+  const pct = t.endsWith("%");
+  const raw = pct ? t.slice(0, -1) : t;
+  const n = Number(raw);
+  if (raw === "" || Number.isNaN(n)) return NaN;
+  return Math.round(pct ? (n / 100) * scale : n);
 }
 
 /** Parse the argument list inside `rgb()` or `rgba()`. */
@@ -57,7 +60,11 @@ function parseRgbArgs(args: string): RGB | null {
   const g = channel(parts[1]);
   const b = channel(parts[2]);
   if ([r, g, b].some((n) => Number.isNaN(n))) return null;
-  return { r, g, b };
+  return {
+    r: Math.min(255, Math.max(0, r)),
+    g: Math.min(255, Math.max(0, g)),
+    b: Math.min(255, Math.max(0, b)),
+  };
 }
 
 /**

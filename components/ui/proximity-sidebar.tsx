@@ -135,6 +135,30 @@ const getElementSectionKind = (id: string): SectionKind | undefined => {
   if (tagName) return "body";
 };
 
+const resolveSectionKinds = (
+  sections: ProximitySection[],
+  detectFromDom: boolean,
+) =>
+  sections.reduce<Record<string, SectionKind>>((nextKinds, section) => {
+    nextKinds[section.id] =
+      !detectFromDom || section.kind || section.level
+        ? getSectionKind(section)
+        : (getElementSectionKind(section.id) ?? getSectionKind(section));
+
+    return nextKinds;
+  }, {});
+
+const kindsMatch = (
+  current: Record<string, SectionKind>,
+  next: Record<string, SectionKind>,
+) => {
+  const ids = Object.keys(next);
+  return (
+    ids.length === Object.keys(current).length &&
+    ids.every((id) => current[id] === next[id])
+  );
+};
+
 const getScrollParent = (element: HTMLElement) => {
   let parent = element.parentElement;
 
@@ -245,7 +269,7 @@ const Dash = ({
     >
       <motion.span
         className={cn(
-          "block transition-[background-color,opacity] duration-100 ease group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2",
+          "block transition-[background-color,opacity] duration-100 ease-out group-focus-visible:ring-2 group-focus-visible:ring-ring group-focus-visible:ring-offset-2",
           DASH_HEIGHT_CLASS,
           isFilled
             ? fillOpacity == null && (aimed ? FILL_HOVER_CLASS : FILL_CLASS)
@@ -298,18 +322,20 @@ const ProximitySidebar = ({
     [sections],
   );
 
-  const detectedKinds = useMemo(
-    () =>
-      sections.reduce<Record<string, SectionKind>>((nextKinds, section) => {
-        nextKinds[section.id] =
-          section.kind || section.level
-            ? getSectionKind(section)
-            : (getElementSectionKind(section.id) ?? getSectionKind(section));
-
-        return nextKinds;
-      }, {}),
-    [sections],
+  const [detectedKinds, setDetectedKinds] = useState(() =>
+    resolveSectionKinds(sections, false),
   );
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const nextKinds = resolveSectionKinds(sections, true);
+      setDetectedKinds((current) =>
+        kindsMatch(current, nextKinds) ? current : nextKinds,
+      );
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [sections]);
 
   const recaptureCenters = useCallback(() => {
     for (const [id, node] of dashRefs.current) {
@@ -446,12 +472,17 @@ const ProximitySidebar = ({
         return;
       }
 
-      const lastSection = sections.findLast((section) =>
-        getSectionElement(section.id),
-      );
-      const lastElement = lastSection
-        ? getSectionElement(lastSection.id)
-        : null;
+      let lastSection: ProximitySection | undefined;
+      let lastElement: HTMLElement | null = null;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        const element = getSectionElement(section.id);
+        if (element) {
+          lastSection = section;
+          lastElement = element;
+          break;
+        }
+      }
 
       if (
         lastSection &&
@@ -610,7 +641,9 @@ const ProximitySidebar = ({
       >
         {sections.map((section, index) => {
           const sectionKind =
-            detectedKinds[section.id] ?? getSectionKind(section);
+            section.kind || section.level
+              ? getSectionKind(section)
+              : (detectedKinds[section.id] ?? getSectionKind(section));
 
           return (
             <Dash

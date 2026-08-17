@@ -92,8 +92,8 @@ export function BounceSidebar({
 
   const pressIn = useCallback(() => {
     if (reduceMotion) return;
-    animate(scaleX, 1.32, PRESS);
-    animate(scaleY, 0.58, PRESS);
+    animate(scaleY, 1.32, PRESS);
+    animate(scaleX, 0.58, PRESS);
   }, [reduceMotion, scaleX, scaleY]);
 
   const land = useCallback(() => {
@@ -113,8 +113,8 @@ export function BounceSidebar({
         for (const control of controls) control.stop();
       },
     };
-    const squashX = animate(scaleX, 1.32, PRESS);
-    const squashY = animate(scaleY, 0.58, PRESS);
+    const squashY = animate(scaleY, 1.32, PRESS);
+    const squashX = animate(scaleX, 0.58, PRESS);
     const xOut = animate(x, -NEAR_APEX, {
       type: "spring",
       bounce: 0,
@@ -249,6 +249,14 @@ export function BounceSidebar({
           "flex w-full cursor-pointer items-center rounded-lg p-1 text-left text-sm transition-colors duration-200",
           isActive ? "text-foreground" : "text-foreground/50",
         );
+        const pointerRelease = {
+          onPointerDown: pressIn,
+          onPointerUp: () => {
+            if (index === activeIndex) bounceInPlace();
+          },
+          onPointerCancel: land,
+          onPointerLeave: land,
+        };
 
         return (
           <li
@@ -262,12 +270,9 @@ export function BounceSidebar({
                 href={href}
                 data-slot="bounce-sidebar-item"
                 data-active={isActive}
-                onPointerDown={pressIn}
-                onPointerUp={() => {
-                  if (index === activeIndex) bounceInPlace();
-                }}
                 onClick={() => select(index)}
                 className={itemClassName}
+                {...pointerRelease}
               >
                 {label}
               </MotionLink>
@@ -276,12 +281,9 @@ export function BounceSidebar({
                 type="button"
                 data-slot="bounce-sidebar-item"
                 data-active={isActive}
-                onPointerDown={pressIn}
-                onPointerUp={() => {
-                  if (index === activeIndex) bounceInPlace();
-                }}
                 onClick={() => select(index)}
                 className={itemClassName}
+                {...pointerRelease}
               >
                 {label}
               </motion.button>

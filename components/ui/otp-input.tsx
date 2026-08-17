@@ -159,6 +159,7 @@ function DigitDial({
 
   return (
     <span
+      aria-hidden
       data-slot="otp-input-char"
       className="absolute inset-0 overflow-hidden"
     >
@@ -496,26 +497,26 @@ export function OtpInput({
 
               <span
                 className={cn(
-                  "pointer-events-none absolute inset-0 overflow-hidden",
+                  "pointer-events-none absolute inset-0 grid place-items-center overflow-hidden",
                   scale.clip,
-                  !dialing && "grid place-items-center",
                 )}
               >
-                {dialing ? (
-                  <DigitDial
-                    char={slot}
-                    duration={duration}
-                    reduceMotion={Boolean(reduceMotion)}
-                    rowClass={scale.row}
-                    rowRem={scale.rowRem}
-                    className={cn(
-                      "font-semibold text-black dark:text-white",
-                      scale.text,
-                    )}
-                  />
-                ) : (
-                  <AnimatePresence initial={false} custom={cleared}>
-                    {slot && (
+                <AnimatePresence initial={false} custom={cleared}>
+                  {dialing ? (
+                    <DigitDial
+                      key="dial"
+                      char={slot}
+                      duration={duration}
+                      reduceMotion={Boolean(reduceMotion)}
+                      rowClass={scale.row}
+                      rowRem={scale.rowRem}
+                      className={cn(
+                        "font-semibold text-black dark:text-white",
+                        scale.text,
+                      )}
+                    />
+                  ) : (
+                    slot && (
                       <motion.span
                         key={slot}
                         custom={cleared}
@@ -534,9 +535,9 @@ export function OtpInput({
                       >
                         {mask ? "•" : slot}
                       </motion.span>
-                    )}
-                  </AnimatePresence>
-                )}
+                    )
+                  )}
+                </AnimatePresence>
               </span>
             </div>
           );
